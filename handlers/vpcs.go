@@ -11,11 +11,7 @@ import (
 
 func vpc_response() string {
 	svc := ec2.New(session.New())
-	input := &ec2.DescribeVpcsInput{
-		VpcIds: []*string{
-			aws.String("vpc-a01106c2"),
-		},
-	}
+	input := &ec2.DescribeVpcsInput{}
 
 	result, err := svc.DescribeVpcs(input)
 	if err != nil {
@@ -25,11 +21,9 @@ func vpc_response() string {
 				log.Println(aerr.Error())
 			}
 		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
 			log.Println(err.Error())
 		}
-		return
+		return "Unable to retrieve VPC ID's"
 	}
 
 	log.Println(result)
