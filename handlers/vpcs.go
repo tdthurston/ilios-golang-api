@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-func vpc_response() string {
+func VpcResponse() string {
 	svc := ec2.New(session.New())
 	input := &ec2.DescribeVpcsInput{}
 
@@ -27,4 +27,5 @@ func vpc_response() string {
 	}
 
 	log.Println(result)
+	return  strings.Join(vpcIDs, ", ")
 }

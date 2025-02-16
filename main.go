@@ -19,7 +19,7 @@ func main() {
 }
 
 func vpcHandler(w http.ResponseWriter, r *http.Request) {
-	vpcs := vpc_response()
+	vpcs := VpcResponse()
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(vpcs))
