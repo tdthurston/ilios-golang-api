@@ -1,6 +1,7 @@
-package main
+package handlers
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -10,7 +11,9 @@ import (
 )
 
 func VpcResponse() string {
-	svc := ec2.New(session.New())
+	sess := session.Must(session.NewSession())
+	sess.Config.Region = aws.String("us-east-1")
+	svc := ec2.New(sess)
 	input := &ec2.DescribeVpcsInput{}
 
 	result, err := svc.DescribeVpcs(input)
@@ -23,9 +26,25 @@ func VpcResponse() string {
 		} else {
 			log.Println(err.Error())
 		}
-		return "Unable to retrieve VPC ID's"
+		return "Unable to retrieve VPC data"
 	}
 
-	log.Println(result)
-	return  strings.Join(vpcIDs, ", ")
+	// Extract VPC Data
+	vpcs := []map[string]string{}
+	for _, vpc := range result.Vpcs {
+		vpcData := map[string]string{
+			"id": *vpc.VpcId,
+		}
+		vpcs = append(vpcs, vpcData)
+	}
+
+	// Convert the VPC data into JSON format
+	vpcsJSON, err := json.Marshal(map[string]interface{}{"vpcs": vpcs})
+	if err != nil {
+		log.Println("Error marshaling VPCs to JSON:", err)
+		return `{"error": "Error processing VPC data"}`
+	}
+
+	return string(vpcsJSON)
+
 }
