@@ -10,8 +10,8 @@ import (
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/vpcs", vpcHandler)
-	//	mux.HandleFunc("/ec2s", ec2Handler)
-	//	mux.HandleFunc("/eks", eksHandler)
+	mux.HandleFunc("/ec2s", ec2Handler)
+	mux.HandleFunc("/eks", eksHandler)
 	//	mux.HandleFunc("/health", healthHandler)
 	log.Println("Listening on :8080")
 	err := http.ListenAndServe(":8080", mux)
@@ -21,27 +21,27 @@ func main() {
 }
 
 func vpcHandler(w http.ResponseWriter, r *http.Request) {
-	vpcs := handlers.VpcResponse()
+	vpcs := handlers.VpcInfo()
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(vpcs))
 }
 
-/*
 func ec2Handler(w http.ResponseWriter, r *http.Request) {
-	ec2s := GetRandomJoke()
+	ec2s := handlers.Ec2Info()
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte(joke))
+	_, _ = w.Write([]byte(ec2s))
 }
 
 func eksHandler(w http.ResponseWriter, r *http.Request) {
-	eks := GetMadLib()
+	eks := handlers.EksInfo()
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte(madLib))
+	_, _ = w.Write([]byte(eks))
 }
 
+/*
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	joke := GetRandomJoke()
 	w.Header().Set("Content-Type", "text/plain")

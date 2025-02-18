@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-func VpcResponse() string {
+func VpcInfo() string {
 	sess := session.Must(session.NewSession())
 	sess.Config.Region = aws.String("us-east-1")
 	svc := ec2.New(sess)
@@ -32,14 +32,26 @@ func VpcResponse() string {
 	// Extract VPC Data
 	vpcs := []map[string]string{}
 	for _, vpc := range result.Vpcs {
+		vpcName := "N/A"
+		for _, tag := range vpc.Tags {
+			if *tag.Key == "Name" {
+				vpcName = *tag.Value
+				break
+			}
+		}
+
 		vpcData := map[string]string{
-			"id": *vpc.VpcId,
+
+			"name":  vpcName,
+			"id":    *vpc.VpcId,
+			"cidr":  *vpc.CidrBlock,
+			"state": *vpc.State,
 		}
 		vpcs = append(vpcs, vpcData)
 	}
 
 	// Convert the VPC data into JSON format
-	vpcsJSON, err := json.Marshal(map[string]interface{}{"vpcs": vpcs})
+	vpcsJSON, err := json.MarshalIndent(map[string]interface{}{"vpcs": vpcs}, "", "    ")
 	if err != nil {
 		log.Println("Error marshaling VPCs to JSON:", err)
 		return `{"error": "Error processing VPC data"}`
