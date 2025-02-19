@@ -42,17 +42,19 @@ func Ec2Info() string {
 			}
 
 			ec2Data := map[string]string{
+
 				"name":  ec2Name,
 				"id":    *instance.InstanceId,
 				"type":  *instance.InstanceType,
 				"state": *instance.State.Name,
+				
 			}
 			ec2s = append(ec2s, ec2Data)
 		}
 	}
 
 	// Convert the EC2 data into JSON format
-	ec2sJSON, err := json.MarshalIndent(map[string]interface{}{"ec2s": ec2s}, "", "    ")
+	ec2sJSON, err := json.MarshalIndent(map[string]interface{}{"EC2 Instances": ec2s}, "", "    ")
 	if err != nil {
 		log.Println("Error marshaling EC2s to JSON:", err)
 		return `{"error": "Error processing EC2 data"}`

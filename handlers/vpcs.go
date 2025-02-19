@@ -46,12 +46,13 @@ func VpcInfo() string {
 			"id":    *vpc.VpcId,
 			"cidr":  *vpc.CidrBlock,
 			"state": *vpc.State,
+			
 		}
 		vpcs = append(vpcs, vpcData)
 	}
 
 	// Convert the VPC data into JSON format
-	vpcsJSON, err := json.MarshalIndent(map[string]interface{}{"vpcs": vpcs}, "", "    ")
+	vpcsJSON, err := json.MarshalIndent(map[string]interface{}{"VPCs": vpcs}, "", "    ")
 	if err != nil {
 		log.Println("Error marshaling VPCs to JSON:", err)
 		return `{"error": "Error processing VPC data"}`

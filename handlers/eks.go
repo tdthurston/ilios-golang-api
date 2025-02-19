@@ -30,16 +30,18 @@ func EksInfo() string {
 		}
 
 		eksData := map[string]string{
+
 			"name":    *describeClusterOutput.Cluster.Name,
 			"arn":     *describeClusterOutput.Cluster.Arn,
 			"status":  *describeClusterOutput.Cluster.Status,
 			"version": *describeClusterOutput.Cluster.Version,
+			
 		}
 		eksClusters = append(eksClusters, eksData)
 	}
 
 	// Convert the EC2 data into JSON format
-	eksJSON, err := json.MarshalIndent(map[string]interface{}{"ec2s": eksClusters}, "", "    ")
+	eksJSON, err := json.MarshalIndent(map[string]interface{}{"EKS Clusters": eksClusters}, "", "    ")
 	if err != nil {
 		log.Println("Error marshaling EKS info to JSON:", err)
 		return `{"error": "Error processing EKS data"}`

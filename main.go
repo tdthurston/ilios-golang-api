@@ -12,7 +12,7 @@ func main() {
 	mux.HandleFunc("/vpcs", vpcHandler)
 	mux.HandleFunc("/ec2s", ec2Handler)
 	mux.HandleFunc("/eks", eksHandler)
-	//	mux.HandleFunc("/health", healthHandler)
+	mux.HandleFunc("/health", HealthCheckHandler)
 	log.Println("Listening on :8080")
 	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
@@ -41,11 +41,7 @@ func eksHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(eks))
 }
 
-/*
-func healthHandler(w http.ResponseWriter, r *http.Request) {
-	joke := GetRandomJoke()
-	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte(joke))
+
+func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	handlers.StatusCheck(w, r)
 }
-*/
