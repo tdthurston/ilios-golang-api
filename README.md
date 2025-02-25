@@ -1,4 +1,4 @@
-# Golang API
+### Ilios Golang API
 
 Part one of the final project for the Ilios LLC internship program.
 
@@ -16,61 +16,7 @@ The infrastructure for this project is managed using Terraform and includes the 
 - **Kubernetes Deployment**: A Kubernetes deployment for the Golang API.
 - **Kubernetes Service**: A Kubernetes service to expose the Golang API deployment.
 
-## Directory Structure
-
-Sure! Here is an updated version of your README.md file that includes information about the Kubernetes deployment and other infrastructure components:
-
-```markdown
-# Golang API
-
-Part one of the final project for the Ilios LLC internship program.
-
-This API returns AWS metadata for the currently configured AWS account using the AWS SDK v2 for Go.
-
-Each endpoint will return associated data for VPCs (/vpcs), EC2 instances (/ec2s), or EKS clusters (/eks) using their respective paths, as well as a health check using /health.
-
-## Infrastructure Overview
-
-The infrastructure for this project is managed using Terraform and includes the following components:
-
-- **VPC**: A Virtual Private Cloud (VPC) with public and private subnets.
-- **EKS Cluster**: An Amazon Elastic Kubernetes Service (EKS) cluster for running the Golang API.
-- **Load Balancer**: An Application Load Balancer (ALB) to distribute traffic to the Kubernetes service.
-- **Kubernetes Deployment**: A Kubernetes deployment for the Golang API.
-- **Kubernetes Service**: A Kubernetes service to expose the Golang API deployment.
-
-## Directory Structure
-
-```
-ilios-golang-api/
-├── terraform/
-│   ├── main.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   ├── kubeconfig_template.yaml
-│   ├── test_deploy.tfvars
-│   ├── modules/
-│   │   ├── vpc/
-│   │   │   ├── main.tf
-│   │   │   ├── variables.tf
-│   │   │   └── outputs.tf
-│   │   ├── eks/
-│   │   │   ├── main.tf
-│   │   │   ├── variables.tf
-│   │   │   └── outputs.tf
-│   │   ├── load_balancer/
-│   │   │   ├── main.tf
-│   │   │   ├── variables.tf
-│   │   │   └── outputs.tf
-│   │   └── k8s/
-│   │       ├── main.tf
-│   │       ├── variables.tf
-│   │       ├── outputs.tf
-│   │       └── kubeconfig.yaml
-└── ...
-```
-
-## Usage
+### Usage
 
 ### Prerequisites
 
@@ -110,4 +56,3 @@ ilios-golang-api/
 ## License
 
 This project is licensed under the MIT License.
-```
