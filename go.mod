@@ -1,6 +1,6 @@
 module github.com/tdthurston/ilios-final-project
 
-go 1.24.0
+go 1.21
 
 require (
 	github.com/aws/aws-sdk-go v1.55.6

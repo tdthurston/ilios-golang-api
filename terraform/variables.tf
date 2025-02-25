@@ -74,3 +74,10 @@ variable "target_group_name" {
   description = "The name of the target group"
   type        = string
 }
+
+# Define Kubernetes variables
+
+variable "k8s_replicas" {
+  description = "Number of replicas in k8s deployment"
+  type        = number
+}

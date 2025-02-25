@@ -40,3 +40,27 @@ module "ilios_lb" {
 
 }
 
+module "ilios_k8s" {
+
+  source = "./modules/k8s"
+
+  k8s_replicas = var.k8s_replicas
+  k8s_cluster_name = module.ilios_eks_cluster.cluster_name
+  kubeconfig_path  = local_file.kubeconfig.filename
+
+}
+
+data "template_file" "kubeconfig" {
+  template = file("${path.module}/kubeconfig_template.yaml")
+  vars = {
+    ca_certificate = base64encode(module.ilios_eks_cluster.cluster_ca_certificate)
+    endpoint       = module.ilios_eks_cluster.cluster_endpoint
+    cluster_name   = module.ilios_eks_cluster.cluster_name
+    token          = data.aws_eks_cluster_auth.this.token
+  }
+}
+
+resource "local_file" "kubeconfig" {
+  content  = data.template_file.kubeconfig.rendered
+  filename = "${path.module}/kubeconfig.yaml"
+}
