@@ -60,6 +60,10 @@ data "template_file" "kubeconfig" {
   }
 }
 
+data "aws_eks_cluster_auth" "this" {
+  name = module.ilios_eks_cluster.cluster_name
+}
+
 resource "local_file" "kubeconfig" {
   content  = data.template_file.kubeconfig.rendered
   filename = "${path.module}/kubeconfig.yaml"
