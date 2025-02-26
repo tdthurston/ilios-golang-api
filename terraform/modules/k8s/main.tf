@@ -1,7 +1,3 @@
-  provider "kubernetes" {
-  config_path = var.kubeconfig_path
-}
-
 resource "kubernetes_deployment" "golang_api_deploy" {
   metadata {
     name = "golang-api-deploy"

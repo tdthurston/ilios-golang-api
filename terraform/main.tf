@@ -50,6 +50,10 @@ module "ilios_k8s" {
 
 }
 
+data "aws_eks_cluster_auth" "cluster_auth" {
+  name = module.ilios_eks_cluster.cluster_name
+}
+
 data "template_file" "kubeconfig" {
   template = file("${path.module}/kubeconfig_template.yaml")
   vars = {
@@ -60,11 +64,11 @@ data "template_file" "kubeconfig" {
   }
 }
 
-data "aws_eks_cluster_auth" "cluster_auth" {
-  name = module.ilios_eks_cluster.cluster_name
-}
-
 resource "local_file" "kubeconfig" {
   content  = data.template_file.kubeconfig.rendered
   filename = "${path.module}/kubeconfig.yaml"
+}
+
+provider "kubernetes" {
+  config_path = local_file.kubeconfig.filename
 }
