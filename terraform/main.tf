@@ -53,14 +53,14 @@ module "ilios_k8s" {
 data "template_file" "kubeconfig" {
   template = file("${path.module}/kubeconfig_template.yaml")
   vars = {
-    ca_certificate = base64encode(module.ilios_eks_cluster.cluster_ca_certificate)
+    ca_certificate = module.ilios_eks_cluster.cluster_ca_certificate
     endpoint       = module.ilios_eks_cluster.cluster_endpoint
     cluster_name   = module.ilios_eks_cluster.cluster_name
-    token          = data.aws_eks_cluster_auth.this.token
+    token          = data.aws_eks_cluster_auth.cluster_auth.token
   }
 }
 
-data "aws_eks_cluster_auth" "this" {
+data "aws_eks_cluster_auth" "cluster_auth" {
   name = module.ilios_eks_cluster.cluster_name
 }
 

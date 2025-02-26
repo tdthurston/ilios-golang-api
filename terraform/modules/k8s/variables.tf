@@ -8,7 +8,7 @@ variable "k8s_cluster_name" {
   type        = string
 }
 
-variable "kubeconfig_path" {
+  variable "kubeconfig_path" {
   description = "The path to the kubeconfig file to use for the Kubernetes deployment"
   type        = string
 }
