@@ -22,3 +22,8 @@ variable "eks_token" {
   description = "The token for the EKS cluster"
   type        = string
 }
+
+variable "irsa_role_arn" {
+  description = "The ARN of the IAM role to associate with the service account"
+  type        = string
+}

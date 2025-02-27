@@ -4,6 +4,16 @@ provider "kubernetes" {
   token                  = var.eks_token
 }
 
+resource "kubernetes_service_account" "ilios_service_account" {
+  metadata {
+    name      = "ilios-service-account"
+    namespace = "default"
+    annotations = {
+      "eks.amazonaws.com/role-arn" = var.irsa_role_arn
+    }
+  }
+}
+
 resource "kubernetes_deployment" "golang_api_deploy" {
   metadata {
     name = "golang-api-deploy"

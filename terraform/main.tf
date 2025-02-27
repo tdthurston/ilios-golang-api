@@ -49,24 +49,25 @@ module "ilios_k8s" {
   eks_endpoint               = data.aws_eks_cluster.eks.endpoint
   eks_cluster_ca_certificate = data.aws_eks_cluster.eks.certificate_authority.0.data
   eks_token                  = data.aws_eks_cluster_auth.eks.token
+  irsa_role_arn              = module.oidc.oidc_role_arn
 
 }
 
 data "aws_eks_cluster" "eks" {
-  name       = module.ilios_eks_cluster.cluster_name
-  depends_on = [module.ilios_eks_cluster]
+  name = module.ilios_eks_cluster.cluster_name
+  depends_on = [ module.ilios_eks_cluster ]
 }
 
 data "aws_eks_cluster_auth" "eks" {
-  name       = module.ilios_eks_cluster.cluster_name
-  depends_on = [module.ilios_eks_cluster]
+  name = module.ilios_eks_cluster.cluster_name
+  depends_on = [ module.ilios_eks_cluster ]
 }
 
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.eks.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks.certificate_authority.0.data)
   token                  = data.aws_eks_cluster_auth.eks.token
-
+  
 }
 
 data "kubernetes_service" "golang_api_service" {
@@ -74,7 +75,7 @@ data "kubernetes_service" "golang_api_service" {
     name      = "golang-api-service"
     namespace = "default"
   }
-  depends_on = [module.ilios_eks_cluster]
+  depends_on = [ module.ilios_eks_cluster ]
 }
 
 output "eks_endpoint" {
@@ -87,7 +88,7 @@ output "eks_cluster_ca_certificate" {
 }
 
 output "eks_token" {
-  value     = data.aws_eks_cluster_auth.eks.token
+  value = data.aws_eks_cluster_auth.eks.token
   sensitive = true
 }
 
