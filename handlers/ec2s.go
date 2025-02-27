@@ -12,7 +12,7 @@ import (
 
 func Ec2Info() string {
 	sess := session.Must(session.NewSession())
-	sess.Config.Region = aws.String("us-east-1")
+	sess.Config.Region = aws.String("AWS_REGION")
 	svc := ec2.New(sess)
 	input := &ec2.DescribeInstancesInput{}
 
@@ -47,7 +47,6 @@ func Ec2Info() string {
 				"id":    *instance.InstanceId,
 				"type":  *instance.InstanceType,
 				"state": *instance.State.Name,
-				
 			}
 			ec2s = append(ec2s, ec2Data)
 		}

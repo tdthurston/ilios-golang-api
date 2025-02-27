@@ -12,7 +12,7 @@ import (
 
 func VpcInfo() string {
 	sess := session.Must(session.NewSession())
-	sess.Config.Region = aws.String("us-east-1")
+	sess.Config.Region = aws.String("AWS_REGION")
 	svc := ec2.New(sess)
 	input := &ec2.DescribeVpcsInput{}
 
@@ -46,7 +46,6 @@ func VpcInfo() string {
 			"id":    *vpc.VpcId,
 			"cidr":  *vpc.CidrBlock,
 			"state": *vpc.State,
-			
 		}
 		vpcs = append(vpcs, vpcData)
 	}

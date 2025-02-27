@@ -5,6 +5,9 @@
 *.tfstate
 *.tfstate.*
 
+# Ignore terraform lock files
+*.tflock*
+
 # Crash log files
 crash.log
 
@@ -28,3 +31,6 @@ terraform.rc
 
 # Ignore provider files
 *.tfprovider
+
+# Ignore kubeconfig files
+*.kubeconfig.yaml

@@ -11,7 +11,7 @@ import (
 
 func EksInfo() string {
 	sess := session.Must(session.NewSession())
-	sess.Config.Region = aws.String("us-east-1")
+	sess.Config.Region = aws.String("AWS_REGION")
 	svc := eks.New(sess)
 
 	result, err := svc.ListClusters(&eks.ListClustersInput{})
@@ -35,7 +35,6 @@ func EksInfo() string {
 			"arn":     *describeClusterOutput.Cluster.Arn,
 			"status":  *describeClusterOutput.Cluster.Status,
 			"version": *describeClusterOutput.Cluster.Version,
-			
 		}
 		eksClusters = append(eksClusters, eksData)
 	}
