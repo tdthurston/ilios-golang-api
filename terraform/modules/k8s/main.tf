@@ -1,3 +1,9 @@
+provider "kubernetes" {
+  host                   = var.eks_endpoint
+  cluster_ca_certificate = base64decode(var.eks_cluster_ca_certificate)
+  token                  = var.eks_token
+}
+
 resource "kubernetes_deployment" "golang_api_deploy" {
   metadata {
     name = "golang-api-deploy"

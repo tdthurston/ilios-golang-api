@@ -44,31 +44,54 @@ module "ilios_k8s" {
 
   source = "./modules/k8s"
 
-  k8s_replicas = var.k8s_replicas
-  k8s_cluster_name = module.ilios_eks_cluster.cluster_name
-  kubeconfig_path  = local_file.kubeconfig.filename
+  k8s_replicas               = var.k8s_replicas
+  k8s_cluster_name           = module.ilios_eks_cluster.cluster_name
+  eks_endpoint               = data.aws_eks_cluster.eks.endpoint
+  eks_cluster_ca_certificate = data.aws_eks_cluster.eks.certificate_authority.0.data
+  eks_token                  = data.aws_eks_cluster_auth.eks.token
 
 }
 
-data "aws_eks_cluster_auth" "cluster_auth" {
-  name = module.ilios_eks_cluster.cluster_name
+data "aws_eks_cluster" "eks" {
+  name       = module.ilios_eks_cluster.cluster_name
+  depends_on = [module.ilios_eks_cluster]
 }
 
-data "template_file" "kubeconfig" {
-  template = file("${path.module}/kubeconfig_template.yaml")
-  vars = {
-    ca_certificate = module.ilios_eks_cluster.cluster_ca_certificate
-    endpoint       = module.ilios_eks_cluster.cluster_endpoint
-    cluster_name   = module.ilios_eks_cluster.cluster_name
-    token          = data.aws_eks_cluster_auth.cluster_auth.token
-  }
-}
-
-resource "local_file" "kubeconfig" {
-  content  = data.template_file.kubeconfig.rendered
-  filename = "${path.module}/kubeconfig.yaml"
+data "aws_eks_cluster_auth" "eks" {
+  name       = module.ilios_eks_cluster.cluster_name
+  depends_on = [module.ilios_eks_cluster]
 }
 
 provider "kubernetes" {
-  config_path = local_file.kubeconfig.filename
+  host                   = data.aws_eks_cluster.eks.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.eks.token
+
+}
+
+data "kubernetes_service" "golang_api_service" {
+  metadata {
+    name      = "golang-api-service"
+    namespace = "default"
+  }
+  depends_on = [module.ilios_eks_cluster]
+}
+
+output "eks_endpoint" {
+  value = data.aws_eks_cluster.eks.endpoint
+}
+
+output "eks_cluster_ca_certificate" {
+  value     = data.aws_eks_cluster.eks.certificate_authority[0].data
+  sensitive = true
+}
+
+output "eks_token" {
+  value     = data.aws_eks_cluster_auth.eks.token
+  sensitive = true
+}
+
+output "load_balancer_dns" {
+  description = "The DNS name of the load balancer hosting the Golang API service"
+  value       = data.kubernetes_service.golang_api_service.status.0.load_balancer.0.ingress.0.hostname
 }

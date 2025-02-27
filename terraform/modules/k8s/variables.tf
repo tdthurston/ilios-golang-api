@@ -8,7 +8,17 @@ variable "k8s_cluster_name" {
   type        = string
 }
 
-  variable "kubeconfig_path" {
-  description = "The path to the kubeconfig file to use for the Kubernetes deployment"
+variable "eks_endpoint" {
+  description = "The endpoint of the EKS cluster"
+  type        = string
+}
+
+variable "eks_cluster_ca_certificate" {
+  description = "The certificate authority of the EKS cluster"
+  type        = string
+}
+
+variable "eks_token" {
+  description = "The token for the EKS cluster"
   type        = string
 }
