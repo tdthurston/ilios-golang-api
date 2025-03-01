@@ -75,11 +75,6 @@ variable "target_group_name" {
   type        = string
 }
 
-variable "instance_name" {
-  description = "The name of the instance"
-  type        = string
-}
-
 # Define Kubernetes variables
 
 variable "k8s_replicas" {
