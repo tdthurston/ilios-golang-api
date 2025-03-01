@@ -1,4 +1,4 @@
-module github.com/tdthurston/ilios-final-project
+module github.com/tdthurston/ilios-golang-api
 
 go 1.21
 

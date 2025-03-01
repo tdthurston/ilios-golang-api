@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/tdthurston/ilios-final-project/handlers"
+	"github.com/tdthurston/ilios-golang-api/handlers"
 )
 
 func main() {
