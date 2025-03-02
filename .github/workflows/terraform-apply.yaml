@@ -27,12 +27,12 @@ jobs:
       - name: Extract Outputs
         id: outputs
         run: |
-          echo "::set-output name=cluster_name::$(terraform output -raw cluster_name)"
-          echo "::set-output name=aws_region::$(terraform output -raw aws_region)"
-          echo "::set-output name=oidc_role_arn::$(terraform output -raw oidc_role_arn)"
+          echo "cluster_name=$(terraform output -raw cluster_name)" >> $GITHUB_ENV
+          echo "aws_region=$(terraform output -raw aws_region)" >> $GITHUB_ENV
+          echo "oidc_role_arn=$(terraform output -raw oidc_role_arn)" >> $GITHUB_ENV
 
       - name: Set Repository Variables
         run: |
-          echo "AWS_REGION=${{ steps.outputs.outputs.aws_region }}" >> $GITHUB_ENV
-          echo "CLUSTER_NAME=${{ steps.outputs.outputs.cluster_name }}" >> $GITHUB_ENV
-          echo "OIDC_ROLE_ARN=${{ steps.outputs.outputs.oidc_role_arn }}" >> $GITHUB_ENV
+          echo "AWS_REGION=${{ env.aws_region }}" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=${{ env.cluster_name }}" >> $GITHUB_ENV
+          echo "OIDC_ROLE_ARN=${{ env.oidc_role_arn }}" >> $GITHUB_ENV

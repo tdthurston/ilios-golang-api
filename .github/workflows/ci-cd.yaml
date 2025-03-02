@@ -14,9 +14,9 @@ jobs:
       contents: read
 
     env:
-      AWS_REGION: ${{ vars.AWS_REGION }}
-      CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
-      OIDC_ROLE_ARN: ${{ vars.OIDC_ROLE_ARN }}
+      AWS_REGION: ${{ env.AWS_REGION }}
+      CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
+      OIDC_ROLE_ARN: ${{ env.OIDC_ROLE_ARN }}
 
     steps:
       - name: Checkout code
