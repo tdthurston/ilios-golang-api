@@ -81,3 +81,15 @@ variable "k8s_replicas" {
   description = "Number of replicas in k8s deployment"
   type        = number
 }
+
+# Define GitHub variables
+
+variable "github_org" {
+  description = "The GitHub organization name"
+  type        = string
+}
+
+variable "github_repo" {
+  description = "The GitHub repository name"
+  type        = string
+}

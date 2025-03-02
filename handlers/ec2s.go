@@ -11,23 +11,28 @@ import (
 )
 
 func Ec2Info() string {
-	sess := session.Must(session.NewSession())
-	sess.Config.Region = aws.String("AWS_REGION")
-	svc := ec2.New(sess)
-	input := &ec2.DescribeInstancesInput{}
+    // Create a new session using the default credential provider chain
+    sess := session.Must(session.NewSession(&aws.Config{
+        Region: aws.String("AWS_REGION"),
+    }))
 
-	result, err := svc.DescribeInstances(input)
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			default:
-				log.Println(aerr.Error())
-			}
-		} else {
-			log.Println(err.Error())
-		}
-		return "Unable to retrieve EC2 data"
-	}
+    // Create a new EC2 service client
+    svc := ec2.New(sess)
+
+    // Describe EC2 instances
+    input := &ec2.DescribeInstancesInput{}
+    result, err := svc.DescribeInstances(input)
+    if err != nil {
+        if aerr, ok := err.(awserr.Error); ok {
+            switch aerr.Code() {
+            default:
+                log.Println(aerr.Error())
+            }
+        } else {
+            log.Println(err.Error())
+        }
+        return "Unable to retrieve EC2 data"
+    }
 
 	// Extract EC2 Data
 	ec2s := []map[string]string{}

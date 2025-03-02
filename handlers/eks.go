@@ -10,34 +10,38 @@ import (
 )
 
 func EksInfo() string {
-	sess := session.Must(session.NewSession())
-	sess.Config.Region = aws.String("AWS_REGION")
-	svc := eks.New(sess)
+    // Create a new session using the default credential provider chain
+    sess := session.Must(session.NewSession(&aws.Config{
+        Region: aws.String("us-east-1"), // Replace with your AWS region
+    }))
 
-	result, err := svc.ListClusters(&eks.ListClustersInput{})
-	if err != nil {
-		log.Println("Error listing clusters:", err)
-		return `{"error": "Unable to retrieve EKS clusters"}`
-	}
+    // Create a new EKS service client
+    svc := eks.New(sess)
 
-	// Extract EKS Data
-	eksClusters := []map[string]string{}
-	for _, clusterName := range result.Clusters {
-		describeClusterOutput, err := svc.DescribeCluster(&eks.DescribeClusterInput{Name: clusterName})
-		if err != nil {
-			log.Println("Error describing cluster:", err)
-			continue
-		}
+    // List EKS clusters
+    result, err := svc.ListClusters(&eks.ListClustersInput{})
+    if err != nil {
+        log.Println("Error listing clusters:", err)
+        return `{"error": "Unable to retrieve EKS clusters"}`
+    }
 
-		eksData := map[string]string{
+    // Extract EKS Data
+    eksClusters := []map[string]string{}
+    for _, clusterName := range result.Clusters {
+        describeClusterOutput, err := svc.DescribeCluster(&eks.DescribeClusterInput{Name: clusterName})
+        if err != nil {
+            log.Println("Error describing cluster:", err)
+            continue
+        }
 
-			"name":    *describeClusterOutput.Cluster.Name,
-			"arn":     *describeClusterOutput.Cluster.Arn,
-			"status":  *describeClusterOutput.Cluster.Status,
-			"version": *describeClusterOutput.Cluster.Version,
-		}
-		eksClusters = append(eksClusters, eksData)
-	}
+        eksData := map[string]string{
+            "name":    *describeClusterOutput.Cluster.Name,
+            "arn":     *describeClusterOutput.Cluster.Arn,
+            "status":  *describeClusterOutput.Cluster.Status,
+            "version": *describeClusterOutput.Cluster.Version,
+        }
+        eksClusters = append(eksClusters, eksData)
+    }
 
 	// Convert the EC2 data into JSON format
 	eksJSON, err := json.MarshalIndent(map[string]interface{}{"EKS Clusters": eksClusters}, "", "    ")

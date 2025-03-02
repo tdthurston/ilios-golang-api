@@ -61,7 +61,7 @@ module "ilios_k8s" {
   eks_endpoint               = data.aws_eks_cluster.eks.endpoint
   eks_cluster_ca_certificate = data.aws_eks_cluster.eks.certificate_authority.0.data
   eks_token                  = data.aws_eks_cluster_auth.eks.token
-  irsa_role_arn              = module.oidc.oidc_role_arn
+  irsa_role_arn              = module.ilios_oidc.oidc_role_arn
 
 }
 
@@ -79,7 +79,6 @@ provider "kubernetes" {
   host                   = data.aws_eks_cluster.eks.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks.certificate_authority.0.data)
   token                  = data.aws_eks_cluster_auth.eks.token
-
 }
 
 data "kubernetes_service" "golang_api_service" {
@@ -107,5 +106,5 @@ output "eks_token" {
 
 output "load_balancer_dns" {
   description = "DNS name of the load balancer hosting the Golang API service"
-  value       = data.kubernetes_service.golang_api_service.status.0.load_balancer.0.ingress.0.hostname
+  value       = try(data.kubernetes_service.golang_api_service.status.0.load_balancer.0.ingress.0.hostname, "DNS name not available yet")
 }

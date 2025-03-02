@@ -15,5 +15,5 @@ output "service_ip" {
 
 output "api_lb_dns" {
   description = "DNS name of the load balancer hosting the Golang API service"
-  value       = data.kubernetes_service.golang_api_service.status[0].load_balancer[0].ingress[0].hostname
+  value       = kubernetes_service.golang_api_service.status[0].load_balancer[0].ingress[0].hostname
 }

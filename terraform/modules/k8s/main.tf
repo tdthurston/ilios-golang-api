@@ -39,6 +39,7 @@ resource "kubernetes_deployment" "golang_api_deploy" {
       }
 
       spec {
+        service_account_name = kubernetes_service_account.ilios_service_account.metadata[0].name
         container {
           image = "tdthurston/ilios-golang-api:latest"
           name  = "ilios-golang-api"
