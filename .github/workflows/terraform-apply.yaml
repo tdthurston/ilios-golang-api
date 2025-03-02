@@ -26,7 +26,7 @@ jobs:
         run: terraform init
 
       - name: Apply Terraform with tfvars
-        run: terraform apply -var-file="terraform/*.tfvars" -auto-approve
+        run: terraform apply -var-file="ilios-golang-api/terraform/test_deploy.tfvars" -auto-approve
 
       - name: Extract Outputs
         id: outputs
