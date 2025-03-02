@@ -9,6 +9,10 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -27,12 +31,6 @@ jobs:
       - name: Extract Outputs
         id: outputs
         run: |
-          echo "cluster_name=$(terraform output -raw cluster_name)" >> $GITHUB_ENV
-          echo "aws_region=$(terraform output -raw aws_region)" >> $GITHUB_ENV
-          echo "oidc_role_arn=$(terraform output -raw oidc_role_arn)" >> $GITHUB_ENV
-
-      - name: Set Repository Variables
-        run: |
-          echo "AWS_REGION=${{ env.aws_region }}" >> $GITHUB_ENV
-          echo "CLUSTER_NAME=${{ env.cluster_name }}" >> $GITHUB_ENV
-          echo "OIDC_ROLE_ARN=${{ env.oidc_role_arn }}" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=$(terraform output -raw cluster_name)" >> $GITHUB_ENV
+          echo "AWS_REGION=$(terraform output -raw aws_region)" >> $GITHUB_ENV
+          echo "OIDC_ROLE_ARN=$(terraform output -raw oidc_role_arn)" >> $GITHUB_ENV
