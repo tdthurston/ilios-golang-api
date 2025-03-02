@@ -35,6 +35,17 @@ jobs:
       - name: Apply Terraform
         run: terraform apply -auto-approve -var-file="terraform/*.tfvars"
 
+      - name: Extract Outputs
+        id: outputs
+        run: |
+          echo "CLUSTER_NAME=$(terraform output -raw cluster_id)" >> $GITHUB_ENV
+          echo "AWS_REGION=$(terraform output -raw aws_region)" >> $GITHUB_ENV
+          echo "OIDC_ROLE_ARN=$(terraform output -raw oidc_role_arn)" >> $GITHUB_ENV
+          echo "DEPLOYMENT_NAME=$(terraform output -raw deployment_name)" >> $GITHUB_ENV
+          echo "SERVICE_NAME=$(terraform output -raw service_name)" >> $GITHUB_ENV
+          echo "SERVICE_IP=$(terraform output -raw service_ip)" >> $GITHUB_ENV
+          echo "API_LB_DNS=$(terraform output -raw api_lb_dns)" >> $GITHUB_ENV
+
   build-and-deploy:
     runs-on: ubuntu-latest
 
@@ -64,5 +75,5 @@ jobs:
 
       - name: Deploy to EKS
         run: |
-          aws eks update-kubeconfig --name ${{ secrets.CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
-          kubectl rollout restart deployment golang-api-deploy
+          aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+          kubectl rollout restart deployment ${{ env.DEPLOYMENT_NAME }}
