@@ -22,11 +22,14 @@ jobs:
         with:
           terraform_version: 1.0.0
 
+      - name: Change directory
+        run: cd terraform
+
       - name: Initialize Terraform
         run: terraform init
 
       - name: Apply Terraform with tfvars
-        run: terraform apply -var-file="ilios-golang-api/terraform/test_deploy.tfvars" -auto-approve
+        run: terraform apply -auto-approve -var-file="test_deploy.tfvars"
 
       - name: Extract Outputs
         id: outputs
