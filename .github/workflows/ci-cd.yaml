@@ -25,7 +25,7 @@ jobs:
       - name: Initialize and Apply Terraform
         run: |
           cd terraform
-          terraform init
+          terraform init -upgrade
           terraform apply -auto-approve -var-file="variables.tfvars"
 
       - name: Extract Outputs
