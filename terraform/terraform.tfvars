@@ -15,5 +15,7 @@ max_unavailable  = 1
 lb_name           = "test-lb"
 target_group_name = "test-target-group"
 
+k8s_replicas = 2
+
 github_org  = "tdthurston"
 github_repo = "ilios-golang-api"
