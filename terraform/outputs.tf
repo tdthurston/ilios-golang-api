@@ -1,5 +1,5 @@
 output "aws_region" {
-  value = module.ilios_vpc.aws_region
+  value       = var.aws_region
 }
 
 output "vpc_id" {

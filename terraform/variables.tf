@@ -1,6 +1,6 @@
 # Specify AWS region you would like to create resources in
 
-variable "vpc_region" {
+variable "aws_region" {
   description = "The AWS region to create resources in"
   type        = string
 }
