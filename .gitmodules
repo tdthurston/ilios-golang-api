@@ -1,0 +1,3 @@
+[submodule "infra"]
+	path = infra
+	url = https://github.com/tdthurston/ilios-base-tf-infra.git
