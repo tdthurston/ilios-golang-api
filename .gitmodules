@@ -1,6 +1,0 @@
-[submodule "terraform/infra"]
-	path = terraform/infra
-	url = https://github.com/tdthurston/ilios-base-tf-infra.git
-[submodule "infra"]
-	path = infra
-	url = https://github.com/tdthurston/ilios-base-tf-infra.git

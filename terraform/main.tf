@@ -15,9 +15,11 @@ provider "aws" {
   region = var.aws_region
 }
 
+
+
 module "ilios_vpc" {
 
-  source             = "git::https://github.com/tdthurston/ilios-base-tf-infra.git//modules//vpc"
+  source             = "../infra/modules/vpc"
   vpc_cidr_block     = var.vpc_cidr_block
   vpc_name           = var.vpc_name
   subnet_cidr_blocks = var.subnet_cidr_blocks
@@ -27,7 +29,7 @@ module "ilios_vpc" {
 
 module "ilios_eks_cluster" {
 
-  source = "git::https://github.com/tdthurston/ilios-base-tf-infra.git//modules//eks"
+  source = "../infra/modules/eks"
 
   cluster_name                 = var.cluster_name
   node_group_name              = var.node_group_name
@@ -45,7 +47,7 @@ module "ilios_eks_cluster" {
 
 module "ilios_lb" {
 
-  source = "git::https://github.com/tdthurston/ilios-base-tf-infra.git//modules/load_balancer"
+  source = "../infra/modules/load_balancer"
 
   lb_name           = var.lb_name
   target_group_name = var.target_group_name
@@ -58,10 +60,9 @@ module "ilios_lb" {
 
 module "ilios_oidc" {
 
-  source      = "git::https://github.com/tdthurston/ilios-base-tf-infra.git//modules/oidc"
+  source      = "../infra/modules/oidc"
   github_org  = var.github_org
   github_repo = var.github_repo
-  aws_region  = var.aws_region
 
 }
 
