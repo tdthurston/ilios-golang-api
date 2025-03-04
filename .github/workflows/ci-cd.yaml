@@ -37,7 +37,7 @@ jobs:
         run: |
           cd terraform
           terraform init -upgrade || exit 1
-          terraform plan -out=tfplan || exit 1
+          terraform plan -var-file="terraform.tfvars" -out=tfplan || exit 1
           terraform apply -auto-approve tfplan || exit 1
           
       - name: Extract Outputs
