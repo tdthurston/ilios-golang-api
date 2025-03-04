@@ -11,10 +11,16 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    outputs:
+      cluster_name: ${{ steps.terraform-outputs.outputs.cluster_name }}
+      aws_region: ${{ steps.terraform-outputs.outputs.aws_region }}
+      oidc_role_arn: ${{ steps.terraform-outputs.outputs.oidc_role_arn }}
       
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
         
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v1
@@ -23,45 +29,48 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.0.0
+          terraform_version: '1.5.7'
           
       - name: Initialize and Apply Terraform
         run: |
           cd terraform
-          terraform init -upgrade
-          terraform apply -auto-approve -var-file="variables.tfvars"
+          terraform init -upgrade || exit 1
+          terraform plan -out=tfplan || exit 1
+          terraform apply -auto-approve tfplan || exit 1
           
       - name: Extract Outputs
-        id: outputs
+        id: terraform-outputs
         run: |
           cd terraform
-          # Store outputs in environment variables for next job
-          echo "CLUSTER_NAME=$(terraform output -raw cluster_id)" >> $GITHUB_ENV
-          echo "AWS_REGION=$(terraform output -raw aws_region)" >> $GITHUB_ENV
-          echo "OIDC_ROLE_ARN=$(terraform output -raw oidc_role_arn)" >> $GITHUB_ENV
-          # Other outputs...
+          # Store outputs in step outputs for access by other jobs
+          echo "cluster_name=$(terraform output -raw eks_cluster_name 2>/dev/null || echo '')" >> $GITHUB_OUTPUT
+          echo "aws_region=$(terraform output -raw aws_region 2>/dev/null || echo '${{ secrets.AWS_REGION }}')" >> $GITHUB_OUTPUT
+          echo "oidc_role_arn=$(terraform output -raw oidc_role_arn 2>/dev/null || echo '${{ secrets.AWS_ROLE_TO_ASSUME }}')" >> $GITHUB_OUTPUT
 
   build-and-deploy:
     runs-on: ubuntu-latest
-
     needs: terraform-apply
+    env:
+      DEPLOYMENT_NAME: golang-api-deploy  # Set the deployment name
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{ env.OIDC_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ needs.terraform-apply.outputs.oidc_role_arn }}
+          aws-region: ${{ needs.terraform-apply.outputs.aws_region }}
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
-          go-version: '1.16'
+          go-version: '1.21'
 
       - name: Build
         run: go build -v ./...
@@ -71,5 +80,5 @@ jobs:
 
       - name: Deploy to EKS
         run: |
-          aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+          aws eks update-kubeconfig --name ${{ needs.terraform-apply.outputs.cluster_name }} --region ${{ needs.terraform-apply.outputs.aws_region }}
           kubectl rollout restart deployment ${{ env.DEPLOYMENT_NAME }}
