@@ -1,4 +1,4 @@
-vpc_region         = "us-east-1"
+aws_region         = "us-east-1"
 vpc_cidr_block     = "10.0.0.0/16"
 vpc_name           = "test-vpc"
 subnet_cidr_blocks = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24", "10.0.4.0/24"]
@@ -18,4 +18,4 @@ target_group_name = "test-target-group"
 k8s_replicas = 2
 
 github_org  = "tdthurston"
-github_repo = "ilios-base-tf-infra"
+github_repo = "ilios-golang-api"
