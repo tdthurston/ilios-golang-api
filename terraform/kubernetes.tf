@@ -37,18 +37,37 @@ provider "kubernetes" {
   }
 }
 
-module "eks_auth" {
-  source = "aidanmelen/eks-auth/aws"
-  eks    = {
-    name = data.aws_eks_cluster.existing.name
+data "kubernetes_config_map" "aws_auth" {
+  metadata {
+    name      = "aws-auth"
+    namespace = "kube-system"
   }
-  
-  map_roles = [
-    {
-      rolearn  = var.github_actions_role_arn
-      username = "github-actions"
-      groups   = ["system:masters"]
-    }
+}
+
+resource "kubernetes_config_map_v1_data" "aws_auth_update" {
+  metadata {
+    name      = "aws-auth"
+    namespace = "kube-system"
+  }
+
+  force = true
+
+
+  data = {
+    mapRoles = yamlencode(
+      distinct(concat(
+        yamldecode(lookup(data.kubernetes_config_map.aws_auth.data, "mapRoles", "[]")),
+        [{
+          rolearn  = var.github_actions_role_arn
+          username = "github-actions"
+          groups   = ["system:masters"]
+        }]
+      ))
+    )
+  }
+
+  depends_on = [
+    data.kubernetes_config_map.aws_auth
   ]
 }
 
