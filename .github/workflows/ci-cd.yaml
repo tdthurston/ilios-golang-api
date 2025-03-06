@@ -48,9 +48,24 @@ jobs:
         run: |
           cd terraform
           
-          CLUSTER_NAME=$(terraform output -raw cluster_name 2>/dev/null) || CLUSTER_NAME="${{ vars.EKS_CLUSTER_NAME }}"
-          AWS_REGION=$(terraform output -raw aws_region 2>/dev/null) || AWS_REGION="${{ vars.AWS_REGION }}"
+          # Check if output exists
+          if terraform output -json cluster_name >/dev/null 2>&1; then
+            CLUSTER_NAME=$(terraform output -raw cluster_name)
+          else
+            CLUSTER_NAME="${{ vars.EKS_CLUSTER_NAME }}"
+          fi
           
+          if terraform output -json aws_region >/dev/null 2>&1; then
+            AWS_REGION=$(terraform output -raw aws_region)
+          else
+            AWS_REGION="${{ vars.AWS_REGION }}"
+          fi
+          
+          # Debug info
+          echo "Using cluster name: $CLUSTER_NAME"
+          echo "Using AWS region: $AWS_REGION"
+          
+          # Set outputs properly
           echo "cluster_name=$CLUSTER_NAME" >> $GITHUB_OUTPUT
           echo "aws_region=$AWS_REGION" >> $GITHUB_OUTPUT
           echo "oidc_role_arn=${{ secrets.AWS_ROLE_TO_ASSUME }}" >> $GITHUB_OUTPUT
