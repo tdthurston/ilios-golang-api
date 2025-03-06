@@ -16,8 +16,3 @@ output "k8s_service_name" {
   description = "The name of the Kubernetes service"
   value       = module.ilios_k8s.service_name
 }
-
-output "k8s_namespace" {
-  description = "The Kubernetes namespace where resources are deployed"
-  value       = module.ilios_k8s.namespace
-}
