@@ -27,3 +27,9 @@ variable "irsa_role_arn" {
   description = "The ARN of the IAM role to associate with the service account"
   type        = string
 }
+
+variable "github_actions_role_arn" {
+  description = "The ARN of the GitHub Actions role to add to the EKS auth configuration"
+  type        = string
+  default     = null
+}

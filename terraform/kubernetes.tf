@@ -37,8 +37,25 @@ provider "kubernetes" {
   }
 }
 
+module "eks_auth" {
+  source = "aidanmelen/eks-auth/aws"
+  eks    = {
+    name = data.aws_eks_cluster.existing.name
+  }
+  
+  map_roles = [
+    {
+      rolearn  = var.github_actions_role_arn
+      username = "github-actions"
+      groups   = ["system:masters"]
+    }
+  ]
+}
+
+data "aws_caller_identity" "current" {}
 
 module "ilios_k8s" {
+
   source = "./modules/k8s"
 
   k8s_replicas               = var.k8s_replicas
@@ -47,6 +64,8 @@ module "ilios_k8s" {
   eks_cluster_ca_certificate = data.aws_eks_cluster.existing.certificate_authority.0.data
   eks_token                  = data.aws_eks_cluster_auth.existing.token
   irsa_role_arn              = var.irsa_role_arn
+  github_actions_role_arn = var.github_actions_role_arn != null ? var.github_actions_role_arn : data.aws_caller_identity.current.arn
+
 }
 
 # Get the service details for output
