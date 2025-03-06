@@ -30,6 +30,11 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: '1.5.7'
+
+      - name: Configure kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ vars.EKS_CLUSTER_NAME }} --region ${{ vars.AWS_REGION }}
+          kubectl get nodes # Verify connection to EKS cluster
           
       - name: Initialize and Apply Terraform
         run: |
