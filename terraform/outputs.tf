@@ -1,7 +1,3 @@
-output "aws_region" {
-  value       = var.aws_region
-}
-
 output "vpc_id" {
   description = "The ID of the VPC"
   value       = module.ilios_vpc.vpc_id
