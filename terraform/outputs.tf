@@ -1,59 +1,33 @@
-output "vpc_id" {
-  description = "The ID of the VPC"
-  value       = module.ilios_vpc.vpc_id
-}
+# Cluster information
 
-output "public_subnet_ids" {
-  description = "The IDs of the public subnets"
-  value       = module.ilios_vpc.public_subnet_ids
-}
-
-output "private_subnet_ids" {
-  description = "The IDs of the private subnets"
-  value       = module.ilios_vpc.private_subnet_ids
-}
-
-output "internet_gateway_id" {
-  description = "The ID of the internet gateway"
-  value       = module.ilios_vpc.internet_gateway_id
-}
-
-output "nat_gateway_id" {
-  description = "The ID of the NAT gateway"
-  value       = module.ilios_vpc.nat_gateway_id
-}
-
-output "vpc_cidr_block" {
-  description = "The CIDR block of the VPC"
-  value       = module.ilios_vpc.vpc_cidr_block
-}
-
-output "cluster_id" {
-  description = "The ID of the EKS cluster"
-  value       = module.ilios_eks_cluster.cluster_id
+output "cluster_name" {
+  description = "The name of the EKS cluster"
+  value       = data.aws_eks_cluster.existing.name
 }
 
 output "cluster_endpoint" {
   description = "The endpoint of the EKS cluster"
-  value       = module.ilios_eks_cluster.cluster_endpoint
+  value       = data.aws_eks_cluster.existing.endpoint
 }
 
-output "instance_type" {
-  description = "The instance type of the EKS cluster"
-  value       = var.instance_type
+output "aws_region" {
+  description = "The AWS region where resources are deployed"
+  value       = var.aws_region
 }
 
-output "lb_arn" {
-  description = "The ARN of the load balancer"
-  value       = module.ilios_lb.lb_arn
+# K8s deployment information
+
+output "k8s_deployment_name" {
+  description = "The name of the Kubernetes deployment"
+  value       = module.ilios_k8s.deployment_name
 }
 
-output "target_group_arn" {
-  description = "The ARN of the target group"
-  value       = module.ilios_lb.target_group_arn
+output "k8s_service_name" {
+  description = "The name of the Kubernetes service"
+  value       = module.ilios_k8s.service_name
 }
 
-output "listener_arn" {
-  description = "The ARN of the listener"
-  value       = module.ilios_lb.listener_arn
+output "k8s_namespace" {
+  description = "The Kubernetes namespace where resources are deployed"
+  value       = module.ilios_k8s.namespace
 }
