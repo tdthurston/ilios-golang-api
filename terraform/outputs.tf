@@ -10,11 +10,6 @@ output "cluster_endpoint" {
   value       = data.aws_eks_cluster.existing.endpoint
 }
 
-output "aws_region" {
-  description = "The AWS region where resources are deployed"
-  value       = var.aws_region
-}
-
 # K8s deployment information
 
 output "k8s_deployment_name" {
