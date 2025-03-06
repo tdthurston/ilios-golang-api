@@ -93,3 +93,8 @@ variable "github_repo" {
   description = "The GitHub repository name"
   type        = string
 }
+
+variable "irsa_role_arn" {
+  description = "IAM role ARN for service account"
+  type        = string
+}

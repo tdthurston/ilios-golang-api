@@ -19,15 +19,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-
-      - name: Debug OIDC Info
-        run: |
-          echo "Repository: ${{ github.repository }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "Event Name: ${{ github.event_name }}"
-          echo "Workflow: ${{ github.workflow }}"
-          echo "Actor: ${{ github.actor }}"
-        
+          
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -43,8 +35,7 @@ jobs:
         run: |
           cd terraform
           terraform init -upgrade || exit 1
-          # Target only the k8s module to avoid conflicts with existing resources
-          terraform plan -target=module.ilios_k8s -var-file="terraform.tfvars" -out=tfplan || exit 1
+          terraform plan -var="irsa_role_arn=${{ vars.IRSA_ROLE_ARN }}" -var-file="terraform.tfvars" -out=tfplan || exit 1
           terraform apply -auto-approve tfplan || exit 1
           
       - name: Extract Outputs
@@ -52,9 +43,9 @@ jobs:
         run: |
           cd terraform
           # Store outputs in step outputs for access by other jobs
-          echo "cluster_name=$(terraform output -raw eks_cluster_name 2>/dev/null || echo '${{ vars.EKS_CLUSTER_NAME }}')" >> $GITHUB_OUTPUT
+          echo "cluster_name=$(terraform output -raw cluster_name 2>/dev/null || echo '${{ vars.EKS_CLUSTER_NAME }}')" >> $GITHUB_OUTPUT
           echo "aws_region=$(terraform output -raw aws_region 2>/dev/null || echo '${{ vars.AWS_REGION }}')" >> $GITHUB_OUTPUT
-          echo "oidc_role_arn=$(terraform output -raw oidc_role_arn 2>/dev/null || echo '${{ secrets.AWS_ROLE_TO_ASSUME }}')" >> $GITHUB_OUTPUT
+          echo "oidc_role_arn=${{ secrets.AWS_ROLE_TO_ASSUME }}" >> $GITHUB_OUTPUT
 
   build-and-deploy:
     runs-on: ubuntu-latest
