@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/eks"
+	"github.com/aws/aws-sdk-go/service/sts"
 )
 
 func EksInfo() string {
@@ -22,8 +23,16 @@ func EksInfo() string {
 		Region: aws.String(region), // Use dynamic region from environment
 	}))
 
-	// Log the region for debugging
-	log.Println("Using AWS region for EKS:", region)
+	// Add identity check for debugging
+	stsClient := sts.New(sess)
+	identity, err := stsClient.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+	if err != nil {
+		log.Println("ERROR: Failed to get AWS identity:", err)
+	} else {
+		log.Println("AWS Identity ARN:", *identity.Arn)
+		log.Println("AWS Account ID:", *identity.Account)
+		log.Println("AWS UserID:", *identity.UserId)
+	}
 
 	// Create a new EKS service client
 	svc := eks.New(sess)

@@ -49,6 +49,11 @@ resource "kubernetes_deployment" "golang_api_deploy" {
             value = var.aws_region
           }
 
+          env {
+            name = "AWS_SDK_LOAD_CONFIG"
+            value = "true"
+          }
+
           resources {
             limits = {
               cpu    = "0.5"

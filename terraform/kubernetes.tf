@@ -97,6 +97,54 @@ data "kubernetes_service" "golang_api_service" {
   depends_on = [module.ilios_k8s]
 }
 
+resource "aws_iam_role" "api_role" {
+  name = "${var.cluster_name}-api-role"
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Principal = {
+        Federated = var.irsa_role_arn  # This is your cluster's OIDC provider ARN
+      },
+      Action = "sts:AssumeRoleWithWebIdentity",
+      Condition = {
+        StringEquals = {
+          "${replace(var.irsa_role_arn, "/^(.*provider/)/", "")}:aud": "sts.amazonaws.com",
+          "${replace(var.irsa_role_arn, "/^(.*provider/)/", "")}:sub": "system:serviceaccount:default:golang-api-sa"  # Change namespace:serviceaccount-name as needed
+        }
+      }
+    }]
+  })
+}
+
+resource "aws_iam_policy" "api_policy" {
+  name        = "${var.cluster_name}-api-policy"
+  description = "Policy for API pods to access AWS resources"
+  
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Action = [
+        "ec2:DescribeVpcs",
+        "ec2:DescribeInstances",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeNetworkInterfaces",
+        "eks:ListClusters",
+        "eks:DescribeCluster"
+      ],
+      Resource = "*"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "api_policy_attachment" {
+  role       = aws_iam_role.api_role.name
+  policy_arn = aws_iam_policy.api_policy.arn
+}
+
 # Outputs
 output "load_balancer_dns" {
   description = "DNS name of the load balancer hosting the Golang API service"

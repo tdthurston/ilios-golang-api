@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/sts"
 )
 
 func VpcInfo() string {
@@ -23,8 +24,15 @@ func VpcInfo() string {
 		Region: aws.String(region),
 	}))
 
-	// Log authentication info for debugging
-	log.Println("Using AWS region:", region)
+	stsClient := sts.New(sess)
+	identity, err := stsClient.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+	if err != nil {
+		log.Println("ERROR: Failed to get AWS identity:", err)
+	} else {
+		log.Println("AWS Identity ARN:", *identity.Arn)
+		log.Println("AWS Account ID:", *identity.Account)
+		log.Println("AWS UserID:", *identity.UserId)
+	}
 
 	// Create EC2 service client
 	svc := ec2.New(sess)
