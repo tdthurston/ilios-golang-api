@@ -33,3 +33,8 @@ variable "github_actions_role_arn" {
   type        = string
   default     = null
 }
+
+variable "aws_region" {
+  description = "The AWS region to use for the deployment"
+  type        = string
+}

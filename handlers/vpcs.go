@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"log"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -11,29 +12,37 @@ import (
 )
 
 func VpcInfo() string {
-    // Create a new session using the default credential provider chain
-    sess := session.Must(session.NewSession(&aws.Config{
-        Region: aws.String("AWS_REGION"),
-    }))
+	// Get region from environment variable or use default
+	region := os.Getenv("AWS_REGION")
+	if region == "" {
+		region = "us-east-1" // Default
+	}
 
-    // Create a new EC2 service client
-    svc := ec2.New(sess)
+	// Create a session with the region
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(region),
+	}))
 
-    // Describe VPCs
-    input := &ec2.DescribeVpcsInput{}
-    result, err := svc.DescribeVpcs(input)
-    if err != nil {
-        if aerr, ok := err.(awserr.Error); ok {
-            switch aerr.Code() {
-            default:
-                log.Println(aerr.Error())
-            }
-        } else {
-            log.Println(err.Error())
-        }
-        return "Unable to retrieve VPC data"
-    }
+	// Log authentication info for debugging
+	log.Println("Using AWS region:", region)
 
+	// Create EC2 service client
+	svc := ec2.New(sess)
+
+	// Describe VPCs
+	input := &ec2.DescribeVpcsInput{}
+	result, err := svc.DescribeVpcs(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			default:
+				log.Println(aerr.Error())
+			}
+		} else {
+			log.Println(err.Error())
+		}
+		return "Unable to retrieve VPC data"
+	}
 
 	// Extract VPC Data
 	vpcs := []map[string]string{}

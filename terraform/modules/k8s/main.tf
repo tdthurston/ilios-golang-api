@@ -44,6 +44,11 @@ resource "kubernetes_deployment" "golang_api_deploy" {
           image = "tdthurston/ilios-golang-api:latest"
           name  = "ilios-golang-api"
 
+          env {
+            name = "AWS_REGION"
+            value = var.aws_region
+          }
+
           resources {
             limits = {
               cpu    = "0.5"

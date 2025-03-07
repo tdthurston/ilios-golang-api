@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"log"
+	"os" // Add os import for environment variables
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -10,38 +11,47 @@ import (
 )
 
 func EksInfo() string {
-    // Create a new session using the default credential provider chain
-    sess := session.Must(session.NewSession(&aws.Config{
-        Region: aws.String("us-east-1"), // Replace with your AWS region
-    }))
+	// Get region from environment variable or use default
+	region := os.Getenv("AWS_REGION")
+	if region == "" {
+		region = "us-east-1" // Default fallback
+	}
 
-    // Create a new EKS service client
-    svc := eks.New(sess)
+	// Create a new session using the default credential provider chain
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(region), // Use dynamic region from environment
+	}))
 
-    // List EKS clusters
-    result, err := svc.ListClusters(&eks.ListClustersInput{})
-    if err != nil {
-        log.Println("Error listing clusters:", err)
-        return `{"error": "Unable to retrieve EKS clusters"}`
-    }
+	// Log the region for debugging
+	log.Println("Using AWS region for EKS:", region)
 
-    // Extract EKS Data
-    eksClusters := []map[string]string{}
-    for _, clusterName := range result.Clusters {
-        describeClusterOutput, err := svc.DescribeCluster(&eks.DescribeClusterInput{Name: clusterName})
-        if err != nil {
-            log.Println("Error describing cluster:", err)
-            continue
-        }
+	// Create a new EKS service client
+	svc := eks.New(sess)
 
-        eksData := map[string]string{
-            "name":    *describeClusterOutput.Cluster.Name,
-            "arn":     *describeClusterOutput.Cluster.Arn,
-            "status":  *describeClusterOutput.Cluster.Status,
-            "version": *describeClusterOutput.Cluster.Version,
-        }
-        eksClusters = append(eksClusters, eksData)
-    }
+	// List EKS clusters
+	result, err := svc.ListClusters(&eks.ListClustersInput{})
+	if err != nil {
+		log.Println("Error listing clusters:", err)
+		return `{"error": "Unable to retrieve EKS clusters"}`
+	}
+
+	// Extract EKS Data
+	eksClusters := []map[string]string{}
+	for _, clusterName := range result.Clusters {
+		describeClusterOutput, err := svc.DescribeCluster(&eks.DescribeClusterInput{Name: clusterName})
+		if err != nil {
+			log.Println("Error describing cluster:", err)
+			continue
+		}
+
+		eksData := map[string]string{
+			"name":    *describeClusterOutput.Cluster.Name,
+			"arn":     *describeClusterOutput.Cluster.Arn,
+			"status":  *describeClusterOutput.Cluster.Status,
+			"version": *describeClusterOutput.Cluster.Version,
+		}
+		eksClusters = append(eksClusters, eksData)
+	}
 
 	// Convert the EC2 data into JSON format
 	eksJSON, err := json.MarshalIndent(map[string]interface{}{"EKS Clusters": eksClusters}, "", "    ")

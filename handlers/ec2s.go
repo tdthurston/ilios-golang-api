@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"log"
+	"os" // Add this import
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -11,28 +12,37 @@ import (
 )
 
 func Ec2Info() string {
-    // Create a new session using the default credential provider chain
-    sess := session.Must(session.NewSession(&aws.Config{
-        Region: aws.String("AWS_REGION"),
-    }))
+	// Get region from environment variable or use default
+	region := os.Getenv("AWS_REGION")
+	if region == "" {
+		region = "us-east-1" // Default fallback
+	}
 
-    // Create a new EC2 service client
-    svc := ec2.New(sess)
+	// Create a new session using the default credential provider chain
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(region), // Use the region variable, not the literal string
+	}))
 
-    // Describe EC2 instances
-    input := &ec2.DescribeInstancesInput{}
-    result, err := svc.DescribeInstances(input)
-    if err != nil {
-        if aerr, ok := err.(awserr.Error); ok {
-            switch aerr.Code() {
-            default:
-                log.Println(aerr.Error())
-            }
-        } else {
-            log.Println(err.Error())
-        }
-        return "Unable to retrieve EC2 data"
-    }
+	// Log the region for debugging
+	log.Println("Using AWS region for EC2:", region)
+
+	// Create a new EC2 service client
+	svc := ec2.New(sess)
+
+	// Describe EC2 instances
+	input := &ec2.DescribeInstancesInput{}
+	result, err := svc.DescribeInstances(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			default:
+				log.Println(aerr.Error())
+			}
+		} else {
+			log.Println(err.Error())
+		}
+		return "Unable to retrieve EC2 data"
+	}
 
 	// Extract EC2 Data
 	ec2s := []map[string]string{}
