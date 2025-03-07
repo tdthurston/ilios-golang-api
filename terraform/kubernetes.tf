@@ -77,6 +77,7 @@ module "ilios_k8s" {
 
   source = "./modules/k8s"
 
+  aws_region                 = var.aws_region
   k8s_replicas               = var.k8s_replicas
   k8s_cluster_name           = var.cluster_name
   eks_endpoint               = data.aws_eks_cluster.existing.endpoint
