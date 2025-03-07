@@ -43,23 +43,23 @@ jobs:
           terraform plan -var="irsa_role_arn=${{ vars.IRSA_ROLE_ARN }}" -var-file="terraform.tfvars" -out=tfplan || exit 1
           terraform apply -auto-approve tfplan || exit 1
           
-          - name: Extract Outputs
-          id: terraform-outputs
-          run: |
-            cd terraform
+      - name: Extract Outputs
+        id: terraform-outputs
+        run: |
+          cd terraform
             
-            # Extract just the first line or value before any debug output
-            CLUSTER_NAME=$(terraform output -raw cluster_name 2>/dev/null | head -n1 | tr -d '\n' || echo "${{ vars.EKS_CLUSTER_NAME }}")
-            AWS_REGION=$(terraform output -raw aws_region 2>/dev/null | head -n1 | tr -d '\n' || echo "${{ vars.AWS_REGION }}")
+          # Extract just the first line or value before any debug output
+          CLUSTER_NAME=$(terraform output -raw cluster_name 2>/dev/null | head -n1 | tr -d '\n' || echo "${{ vars.EKS_CLUSTER_NAME }}")
+          AWS_REGION=$(terraform output -raw aws_region 2>/dev/null | head -n1 | tr -d '\n' || echo "${{ vars.AWS_REGION }}")
             
-            # Debug info - show extracted values
-            echo "Extracted cluster name: '$CLUSTER_NAME'"
-            echo "Extracted AWS region: '$AWS_REGION'"
+          # Debug info - show extracted values
+          echo "Extracted cluster name: '$CLUSTER_NAME'"
+          echo "Extracted AWS region: '$AWS_REGION'"
             
-            # Set outputs with clean values
-            echo "cluster_name=${CLUSTER_NAME}" >> $GITHUB_OUTPUT
-            echo "aws_region=${AWS_REGION}" >> $GITHUB_OUTPUT
-            echo "oidc_role_arn=${{ secrets.AWS_ROLE_TO_ASSUME }}" >> $GITHUB_OUTPUT
+          # Set outputs with clean values
+          echo "cluster_name=${CLUSTER_NAME}" >> $GITHUB_OUTPUT
+          echo "aws_region=${AWS_REGION}" >> $GITHUB_OUTPUT
+          echo "oidc_role_arn=${{ secrets.AWS_ROLE_TO_ASSUME }}" >> $GITHUB_OUTPUT
 
   build-and-deploy:
     runs-on: ubuntu-latest
