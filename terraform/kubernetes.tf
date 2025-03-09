@@ -119,7 +119,7 @@ resource "aws_iam_policy" "ilios_api_permissions" {
 }
 
 resource "aws_iam_role_policy_attachment" "ilios_api_role_attachment" {
-  role       = element(split("/", var.irsa_role_arn), 1)  # Extract role name from ARN
+  role       = reverse(split("/", var.irsa_role_arn))[0]
   policy_arn = aws_iam_policy.ilios_api_permissions.arn
 }
 
