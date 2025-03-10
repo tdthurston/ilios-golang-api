@@ -73,7 +73,7 @@ data "aws_caller_identity" "current" {}
 
 module "ilios_k8s" {
 
-  source = "./modules/k8s"
+  source = "./modules/kubernetes"
 
   aws_region                 = var.aws_region
   k8s_replicas               = var.k8s_replicas
