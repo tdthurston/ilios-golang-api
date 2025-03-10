@@ -15,7 +15,6 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Get information about the existing EKS cluster
 data "aws_eks_cluster" "existing" {
   name = var.cluster_name
 }
@@ -24,7 +23,6 @@ data "aws_eks_cluster_auth" "existing" {
   name = var.cluster_name
 }
 
-# Configure the Kubernetes provider using the existing cluster
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.existing.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.existing.certificate_authority.0.data)
@@ -88,7 +86,6 @@ module "ilios_k8s" {
 
 }
 
-# Get the service details for output
 data "kubernetes_service" "golang_api_service" {
   metadata {
     name      = "golang-api-service"

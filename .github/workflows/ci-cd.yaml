@@ -7,8 +7,48 @@ env:
   DEPLOYMENT_NAME: golang-api-deploy
 
 jobs:
+  deploy-base-infrastructure:
+    name: Deploy Base Infrastructure
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ vars.AWS_REGION }}
+      
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: '1.5.7'
+      
+      - name: Deploy Base Infrastructure
+        run: |
+          cd infra
+          terraform init -upgrade || exit 1
+          terraform plan -var-file="terraform.tfvars" -out=tfplan || exit 1
+          terraform apply -auto-approve tfplan || exit 1
+      
+      - name: Get Infrastructure Outputs
+        id: infra-outputs
+        run: |
+          cd infra
+          echo "cluster_name=$(terraform output -raw eks_cluster_name)" >> $GITHUB_OUTPUT
+          echo "cluster_endpoint=$(terraform output -raw eks_endpoint)" >> $GITHUB_OUTPUT
+          echo "irsa_role_arn=$(terraform output -raw irsa_role_arn)" >> $GITHUB_OUTPUT
+
   terraform-apply:
-    name: Deploy Infrastructure
+    name: Deploy Application Infrastructure
+    needs: deploy-base-infrastructure
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -66,4 +106,3 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ vars.AWS_REGION }}
-      
