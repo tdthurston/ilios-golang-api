@@ -28,7 +28,7 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.existing.certificate_authority.0.data)
   token                  = data.aws_eks_cluster_auth.existing.token
 
-    exec {
+  exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     args        = ["eks", "get-token", "--cluster-name", var.cluster_name]
     command     = "aws"
@@ -82,7 +82,7 @@ module "ilios_k8s" {
   eks_cluster_ca_certificate = data.aws_eks_cluster.existing.certificate_authority.0.data
   eks_token                  = data.aws_eks_cluster_auth.existing.token
   irsa_role_arn              = aws_iam_role.ilios_api_irsa_role.arn
-  github_actions_role_arn = var.github_actions_role_arn != null ? var.github_actions_role_arn : data.aws_caller_identity.current.arn
+  github_actions_role_arn    = var.github_actions_role_arn != null ? var.github_actions_role_arn : data.aws_caller_identity.current.arn
 
 }
 
@@ -96,7 +96,7 @@ data "kubernetes_service" "golang_api_service" {
 
 resource "aws_iam_role" "ilios_api_irsa_role" {
   name = "ilios-api-irsa-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -108,7 +108,7 @@ resource "aws_iam_role" "ilios_api_irsa_role" {
         Action = "sts:AssumeRoleWithWebIdentity",
         Condition = {
           StringEquals = {
-            "${replace(data.aws_eks_cluster.existing.identity[0].oidc[0].issuer, "https://", "")}:sub": "system:serviceaccount:default:ilios-service-account"
+            "${replace(data.aws_eks_cluster.existing.identity[0].oidc[0].issuer, "https://", "")}:sub" : "system:serviceaccount:default:ilios-service-account"
           }
         }
       }
@@ -119,7 +119,7 @@ resource "aws_iam_role" "ilios_api_irsa_role" {
 resource "aws_iam_policy" "ilios_api_permissions" {
   name        = "ilios-api-permissions"
   description = "Permissions for Ilios API to access AWS resources"
-  
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -128,7 +128,7 @@ resource "aws_iam_policy" "ilios_api_permissions" {
         Action = [
           "ec2:DescribeVpcs",
           "ec2:DescribeInstances",
-          "eks:ListClusters", 
+          "eks:ListClusters",
           "eks:DescribeCluster"
         ],
         Resource = "*"

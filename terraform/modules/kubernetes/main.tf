@@ -45,12 +45,12 @@ resource "kubernetes_deployment" "golang_api_deploy" {
           name  = "ilios-golang-api"
 
           env {
-            name = "AWS_REGION"
+            name  = "AWS_REGION"
             value = var.aws_region
           }
 
           env {
-            name = "AWS_SDK_LOAD_CONFIG"
+            name  = "AWS_SDK_LOAD_CONFIG"
             value = "true"
           }
 
