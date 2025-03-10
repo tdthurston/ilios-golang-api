@@ -83,7 +83,7 @@ module "ilios_k8s" {
   eks_endpoint               = data.aws_eks_cluster.existing.endpoint
   eks_cluster_ca_certificate = data.aws_eks_cluster.existing.certificate_authority.0.data
   eks_token                  = data.aws_eks_cluster_auth.existing.token
-  irsa_role_arn              = var.irsa_role_arn
+  irsa_role_arn              = aws_iam_role.ilios_api_irsa_role.arn
   github_actions_role_arn = var.github_actions_role_arn != null ? var.github_actions_role_arn : data.aws_caller_identity.current.arn
 
 }
@@ -97,21 +97,43 @@ data "kubernetes_service" "golang_api_service" {
   depends_on = [module.ilios_k8s]
 }
 
+resource "aws_iam_role" "ilios_api_irsa_role" {
+  name = "ilios-api-irsa-role"
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(data.aws_eks_cluster.existing.identity[0].oidc[0].issuer, "https://", "")}"
+        },
+        Action = "sts:AssumeRoleWithWebIdentity",
+        Condition = {
+          StringEquals = {
+            "${replace(data.aws_eks_cluster.existing.identity[0].oidc[0].issuer, "https://", "")}:sub": "system:serviceaccount:default:ilios-service-account"
+          }
+        }
+      }
+    ]
+  })
+}
+
 resource "aws_iam_policy" "ilios_api_permissions" {
   name        = "ilios-api-permissions"
   description = "Permissions for Ilios API to access AWS resources"
   
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [
       {
-        Effect = "Allow"
+        Effect = "Allow",
         Action = [
           "ec2:DescribeVpcs",
           "ec2:DescribeInstances",
           "eks:ListClusters", 
           "eks:DescribeCluster"
-        ]
+        ],
         Resource = "*"
       }
     ]
@@ -119,7 +141,7 @@ resource "aws_iam_policy" "ilios_api_permissions" {
 }
 
 resource "aws_iam_role_policy_attachment" "ilios_api_role_attachment" {
-  role       = reverse(split("/", var.irsa_role_arn))[0]
+  role       = aws_iam_role.ilios_api_irsa_role.name
   policy_arn = aws_iam_policy.ilios_api_permissions.arn
 }
 
