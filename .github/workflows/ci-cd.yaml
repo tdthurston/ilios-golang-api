@@ -13,6 +13,10 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    outputs:
+      cluster_name: ${{ steps.infra-outputs.outputs.cluster_name }}
+      cluster_endpoint: ${{ steps.infra-outputs.outputs.cluster_endpoint }}
+      irsa_role_arn: ${{ steps.infra-outputs.outputs.irsa_role_arn }}
     
     steps:
       - name: Checkout code
@@ -47,7 +51,7 @@ jobs:
           echo "irsa_role_arn=$(terraform output -raw irsa_role_arn)" >> $GITHUB_OUTPUT
 
   terraform-apply:
-    name: Deploy Application Infrastructure
+    name: Deploy API Infrastructure
     needs: deploy-base-infrastructure
     runs-on: ubuntu-latest
     permissions:
@@ -73,14 +77,14 @@ jobs:
       
       - name: Configure kubeconfig
         run: |
-          aws eks update-kubeconfig --name ${{ vars.EKS_CLUSTER_NAME }} --region ${{ vars.AWS_REGION }}
+          aws eks update-kubeconfig --name ${{ needs.deploy-base-infrastructure.outputs.cluster_name }} --region ${{ vars.AWS_REGION }}
           kubectl get nodes # Verify connection to EKS cluster
       
       - name: Initialize and Apply Terraform
         run: |
           cd terraform
           terraform init -upgrade || exit 1
-          terraform plan -var="irsa_role_arn=${{ vars.IRSA_ROLE_ARN }}" -var-file="terraform.tfvars" -out=tfplan || exit 1
+          terraform plan -var="irsa_role_arn=${{ needs.deploy-base-infrastructure.outputs.irsa_role_arn }}" -var-file="terraform.tfvars" -out=tfplan || exit 1
           terraform apply -auto-approve tfplan || exit 1
       
       - name: Debug Terraform Outputs
@@ -106,3 +110,33 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ vars.AWS_REGION }}
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      
+      - name: Build Go app
+        run: |
+          go build -o golang-api ./cmd
+      
+      - name: Test Go app
+        run: |
+          go test -v ./...
+      
+      - name: Build and Push Docker image
+        run: |
+          aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ vars.ECR_REPOSITORY_URI }}
+          docker build -t golang-api:latest .
+          docker tag golang-api:latest ${{ vars.ECR_REPOSITORY_URI }}:latest
+          docker push ${{ vars.ECR_REPOSITORY_URI }}:latest
+      
+      - name: Deploy to EKS
+        run: |
+          aws eks update-kubeconfig --name ${{ needs.deploy-base-infrastructure.outputs.cluster_name }} --region ${{ vars.AWS_REGION }}
+          kubectl rollout restart deployment ${{ env.DEPLOYMENT_NAME }}
+      
+      - name: Verify deployment
+        run: |
+          kubectl get deployment ${{ env.DEPLOYMENT_NAME }}
+          kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }}
