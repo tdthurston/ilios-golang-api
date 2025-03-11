@@ -1,0 +1,56 @@
+name: Destroy All Resources
+
+on:
+  workflow_dispatch:
+
+jobs:
+  destroy-resources:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+        
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ vars.AWS_REGION }}
+          
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: '1.5.7'
+          
+      - name: Delete Kubernetes Resources
+        run: |
+          # Connect to EKS
+          aws eks update-kubeconfig --name ${{ vars.EKS_CLUSTER_NAME }} --region ${{ vars.AWS_REGION }}
+          
+          # Delete key resources directly with kubectl for cleaner removal
+          kubectl delete deployment,service,serviceaccount --all --ignore-not-found=true
+          
+      - name: Destroy K8s Module with Terraform
+        run: |
+          cd terraform
+          terraform init -upgrade || exit 1
+          
+          # Destroy k8s module with dummy values for required variables
+          terraform destroy -target=module.ilios_k8s \
+            -var="irsa_role_arn=dummy" \
+            -var-file="terraform.tfvars" -auto-approve || echo "K8s destroy had errors, continuing..."
+          
+      - name: Destroy Base Infrastructure
+        run: |
+          cd infra
+          terraform init -upgrade || exit 1
+          
+          # Destroy all base infrastructure
+          terraform destroy -var-file="terraform.tfvars" -auto-approve || exit 1
+          
+          echo "All infrastructure has been destroyed"
