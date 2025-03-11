@@ -24,16 +24,28 @@ This application requires a two-phase deployment process:
 
 ### Step 1: Deploy Base Infrastructure
 
-The base infrastructure must be deployed first since it creates essential AWS resources like the EKS cluster.
+The base infrastructure must be deployed first since it creates essential AWS resources like the EKS cluster. The base infrastructure code is included as a submodule in this repository.
 
-1. **Clone the Base Infrastructure Repository**
+1. **Clone This Repository with Submodules**
 
    ```sh
-   git clone https://github.com/your-org/ilios-base-tf-infra.git
-   cd ilios-base-tf-infra
+   git clone --recurse-submodules https://github.com/tdthurston/ilios-golang-api.git
+   cd ilios-golang-api
    ```
 
-2. **Initialize and Apply Terraform**
+   If you've already cloned the repository without submodules:
+
+   ```sh
+   git submodule update --init --recursive
+   ```
+
+2. **Navigate to the Infrastructure Submodule**
+
+   ```sh
+   cd infra
+   ```
+
+3. **Initialize and Apply Terraform**
 
    ```sh
    terraform init
@@ -41,7 +53,7 @@ The base infrastructure must be deployed first since it creates essential AWS re
    terraform apply
    ```
 
-3. **Save the Outputs**
+4. **Save the Outputs**
 
    After successful deployment, save these important outputs - you'll need them for Step 2:
    
@@ -54,14 +66,7 @@ The base infrastructure must be deployed first since it creates essential AWS re
 
 ### Step 2: Configure GitHub Repository and Workflow
 
-1. **Fork or Clone This Repository**
-
-   ```sh
-   git clone https://github.com/your-org/ilios-golang-api.git
-   cd ilios-golang-api
-   ```
-
-2. **Set Up GitHub Repository Variables**
+1. **Set Up GitHub Repository Variables**
 
    Go to your GitHub repository → Settings → Secrets and variables → Actions → Variables:
    
@@ -69,7 +74,7 @@ The base infrastructure must be deployed first since it creates essential AWS re
    - Add `EKS_CLUSTER_NAME`: Use the value from Step 1
    - Add `IRSA_ROLE_ARN`: Use the value from Step 1
 
-3. **Set Up GitHub Repository Secrets**
+2. **Set Up GitHub Repository Secrets**
 
    Go to GitHub repository → Settings → Secrets and variables → Actions → Secrets:
    
@@ -121,8 +126,35 @@ This project deploys and manages the following components:
 - **Kubernetes Service**: A service to expose the API
 - **IAM Roles**: Required IAM roles and policies for IRSA (IAM Roles for Service Accounts)
 
+## Cleaning Up Resources
+
+When you're done with the project, follow these steps to destroy all resources and avoid unnecessary AWS charges:
+
+1. **Delete Kubernetes Resources First**
+
+   ```sh
+   # Configure kubectl to use your EKS cluster if not already done
+   aws eks update-kubeconfig --name YOUR_CLUSTER_NAME --region YOUR_REGION
+   
+   # Delete the service and deployment
+   kubectl delete service golang-api-service
+   kubectl delete deployment golang-api-deployment
+   ```
+
+2. **Destroy Infrastructure Resources**
+
+   ```sh
+   # Navigate to the infrastructure submodule
+   cd infra
+   
+   # Destroy all Terraform-managed resources
+   terraform destroy
+   ```
+
+3. **Confirm Deletion**
+
+   Verify that all resources have been properly removed by checking the AWS Management Console.
+
 ## License
 
 This project is licensed under the MIT License.
-
-Similar code found with 1 license type
