@@ -1,4 +1,4 @@
-name: Destroy All Resources
+name: Destroy
 
 on:
   workflow_dispatch:

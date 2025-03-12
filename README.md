@@ -132,23 +132,20 @@ When you're done with the project, follow these steps to destroy all resources a
 
 1. **Delete Kubernetes Resources First**
 
-   ```sh
-   # Configure kubectl to use your EKS cluster if not already done
-   aws eks update-kubeconfig --name YOUR_CLUSTER_NAME --region YOUR_REGION
-   
-   # Delete the service and deployment
-   kubectl delete service golang-api-service
-   kubectl delete deployment golang-api-deployment
-   ```
+   You can use the GitHub Actions workflow to destroy all Kubernetes resources:
 
-2. **Destroy Infrastructure Resources**
+   Go to your GitHub repository → Actions → "Destroy" → Run workflow
+
+   This workflow will automatically remove all deployed Kubernetes resources from your cluster (including the API).
+
+2. **Destroy Base Infrastructure Resources**
 
    ```sh
    # Navigate to the infrastructure submodule
    cd infra
    
    # Destroy all Terraform-managed resources
-   terraform destroy
+   terraform destroy -auto-approve
    ```
 
 3. **Confirm Deletion**
