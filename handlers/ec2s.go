@@ -3,7 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"log"
-	"os" // Add this import
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
