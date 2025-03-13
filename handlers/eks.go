@@ -3,7 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"log"
-	"os" // Add os import for environment variables
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -20,7 +20,7 @@ func EksInfo() string {
 
 	// Create a new session using the default credential provider chain
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(region), // Use dynamic region from environment
+		Region: aws.String(region),
 	}))
 
 	// Add identity check for debugging
