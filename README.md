@@ -46,7 +46,7 @@ The base infrastructure must be deployed first since it creates essential AWS re
    ```
 
 3. **Initialize and Apply Terraform**
-
+IMPORTANT NOTE: The `terraform.tfvars` file included with the base infra submodule contains arbitrary values for testing purposes. These values should by changed to your desired values before deploying infrastructure.
    ```sh
    terraform init
    terraform plan
