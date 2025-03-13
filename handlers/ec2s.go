@@ -21,10 +21,10 @@ func Ec2Info() string {
 
 	// Create a new session using the default credential provider chain
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(region), // Use the region variable, not the literal string
+		Region: aws.String(region),
 	}))
 
-	// Add identity check for debugging
+	// Identity check for debugging
 	stsClient := sts.New(sess)
 	identity, err := stsClient.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 	if err != nil {
