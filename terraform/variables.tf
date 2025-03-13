@@ -5,8 +5,6 @@ variable "aws_region" {
   type        = string
 }
 
-
-
 # Define Kubernetes variables
 
 variable "k8s_replicas" {
